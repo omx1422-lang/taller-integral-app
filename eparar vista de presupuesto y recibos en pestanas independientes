@@ -1,0 +1,11 @@
+[33mcommit e37cc7b7ffad44289bb1b48f8e7c104be1d82f7c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Osmar Avila <omx1422@gmail.com>
+Date:   Tue Nov 24 23:48:42 2026 -0300
+
+    fix: correlativo de recibos e historial persistente en localStorage
+
+[33mcommit 461ef987c2040f5d284774be423add01768dcbe6[m
+Author: Osmar Avila <omx1422@gmail.com>
+Date:   Tue Nov 24 23:22:59 2026 -0300
+
+    feat: persistencia local con localStorage y boton nuevo presupuesto

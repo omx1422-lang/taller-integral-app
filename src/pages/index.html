@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Presupuesto — Taller Integral S.A.</title>
+  <title>Taller Integral S.A. — Gestión</title>
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
 <body>
   <main class="container">
     <header class="card header-taller">
       <div>
-        <p class="eyebrow">PRESUPUESTO</p>
+        <p class="eyebrow">SISTEMA DE GESTIÓN</p>
         <h1>TALLER INTEGRAL S.A.</h1>
         <p class="rubros">Metalúrgica · Tornería · Mecánica · Soldaduras · Lavadero</p>
       </div>
@@ -20,135 +20,214 @@
       </div>
     </header>
 
-    <section class="card">
-      <h2>Datos del trabajo</h2>
-      <div class="grid-datos">
-        <div class="campo">
-          <label for="cliente">Cliente</label>
-          <input id="cliente" type="text" placeholder="Ej.: Juan Pérez" />
+    <nav class="tabs-nav" aria-label="Secciones del taller">
+      <button type="button" class="tab-btn activa" data-vista="vistaPresupuesto">Presupuesto</button>
+      <button type="button" class="tab-btn" data-vista="vistaRecibos">Recibos e Historial</button>
+      <button type="button" class="tab-btn" data-vista="vistaClientes">Clientes</button>
+      <button type="button" class="tab-btn" data-vista="vistaProveedores">Proveedores</button>
+    </nav>
+
+    <!-- PESTAÑA 1: PRESUPUESTO (LIMPIO E INDEPENDIENTE) -->
+    <div id="vistaPresupuesto" class="vista-seccion">
+      <section class="card">
+        <div class="section-head">
+          <h2>Datos del trabajo</h2>
+          <button type="button" id="btnNuevoPresupuesto" class="btn-secundario">Nuevo presupuesto</button>
         </div>
-        <div class="campo">
-          <label for="modeloRodado">Modelo / Rodado</label>
-          <input id="modeloRodado" type="text" placeholder="Ej.: CR cosechadora" />
-        </div>
-        <div class="campo">
-          <label for="fechaInicio">Fecha inicio</label>
-          <input id="fechaInicio" type="date" />
-        </div>
-        <div class="campo">
-          <label for="fechaEntrega">Fecha entrega</label>
-          <div class="input-con-accion">
-            <input id="fechaEntrega" type="text" placeholder="Ej.: Inmediata o 28/11/2026" />
-            <button type="button" id="btnInmediata" class="btn-secundario">Inmediata</button>
+        <div class="grid-datos">
+          <div class="campo">
+            <label for="cliente">Cliente</label>
+            <input id="cliente" type="text" placeholder="Ej.: Juan Pérez" />
           </div>
+          <div class="campo">
+            <label for="modeloRodado">Modelo / Rodado</label>
+            <input id="modeloRodado" type="text" placeholder="Ej.: CR cosechadora" />
+          </div>
+          <div class="campo">
+            <label for="fechaInicio">Fecha inicio</label>
+            <input id="fechaInicio" type="date" />
+          </div>
+          <div class="campo">
+            <label for="fechaEntrega">Fecha entrega</label>
+            <div class="input-con-accion">
+              <input id="fechaEntrega" type="text" placeholder="Ej.: Inmediata o 28/11/2026" />
+              <button type="button" id="btnInmediata" class="btn-secundario">Inmediata</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <h2>Descripción de trabajo y montos</h2>
+          <button type="button" id="btnAgregarItem" class="btn-primario">+ Agregar ítem</button>
+        </div>
+
+        <div id="listaItems" class="items-lista"></div>
+
+        <div class="total-box">
+          <span>MONTO TOTAL</span>
+          <strong id="montoTotal">0 Gs</strong>
+        </div>
+
+        <div class="acciones-recibo">
+          <button type="button" id="btnIrARecibo" class="btn-primario">Continuar a Anticipo / Recibo</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA 2: RECIBOS E HISTORIAL (INDEPENDIENTE) -->
+    <div id="vistaRecibos" class="vista-seccion" hidden>
+      <section class="card" id="seccionAnticipo">
+        <div class="section-head">
+          <h2>Anticipo, saldo y generación de recibo</h2>
+          <span id="resumenClienteActivo" class="badge-recibo">Sin cliente cargado</span>
+        </div>
+
+        <div class="grid-datos">
+          <div class="campo">
+            <label for="anticipoGs">Anticipo / entrega inicial (Gs.)</label>
+            <input id="anticipoGs" type="text" inputmode="numeric" placeholder="Ej.: 1.500.000" />
+          </div>
+          <div class="campo">
+            <label for="medioPago">Medio de pago</label>
+            <select id="medioPago">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Cheque">Cheque</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="resumen-pagos">
+          <div class="fila-resumen">
+            <span>Monto total del presupuesto:</span>
+            <strong id="resumenTotal">0 Gs</strong>
+          </div>
+          <div class="fila-resumen">
+            <span>Anticipo / cobrado:</span>
+            <strong id="resumenAnticipo">0 Gs</strong>
+          </div>
+          <div class="fila-resumen saldo-destacado">
+            <span>Saldo pendiente:</span>
+            <strong id="resumenSaldo">0 Gs</strong>
+          </div>
+        </div>
+
+        <div class="acciones-recibo">
+          <button type="button" id="btnGenerarRecibo" class="btn-primario">Generar y guardar recibo</button>
+          <button type="button" id="btnCopiarRecibo" class="btn-secundario">Copiar texto para WhatsApp</button>
+        </div>
+      </section>
+
+      <section class="card recibo-box" id="reciboPreview" hidden>
+        <div class="recibo-header">
+          <div>
+            <p class="eyebrow">COMPROBANTE DE PAGO</p>
+            <h3>RECIBO — TALLER INTEGRAL S.A.</h3>
+          </div>
+          <span id="reciboNumero" class="badge-recibo">REC-0001</span>
+        </div>
+        <div id="reciboDetalle" class="recibo-detalle"></div>
+        <div class="acciones-recibo">
+          <button type="button" id="btnImprimirRecibo" class="btn-secundario">Imprimir / Guardar PDF</button>
+        </div>
+      </section>
+
+      <section class="card" id="seccionGuardados">
+        <div class="section-head">
+          <h2>Historial de presupuestos y recibos</h2>
+          <span id="contadorGuardados" class="badge-recibo">0</span>
+        </div>
+        <div id="listaGuardados" class="guardados-lista">
+          <p class="texto-vacio">Todavía no hay presupuestos guardados.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- PESTAÑA 3: CLIENTES -->
+    <section id="vistaClientes" class="vista-seccion" hidden>
+      <div class="card">
+        <h2>Nuevo cliente</h2>
+        <form id="formCliente" class="grid-datos">
+          <div class="campo">
+            <label for="cliNombre">Nombre o razón social *</label>
+            <input id="cliNombre" type="text" required placeholder="Ej.: Agropecuaria del Sur" />
+          </div>
+          <div class="campo">
+            <label for="cliTelefono">Teléfono / WhatsApp</label>
+            <input id="cliTelefono" type="text" placeholder="Ej.: (0985) 123 456" />
+          </div>
+          <div class="campo">
+            <label for="cliDireccion">Dirección / Zona</label>
+            <input id="cliDireccion" type="text" placeholder="Ej.: Bella Vista / Ruta 6" />
+          </div>
+          <div class="campo">
+            <label for="cliNotas">Notas / Equipos habituales</label>
+            <input id="cliNotas" type="text" placeholder="Ej.: Cosechadoras, acoplados" />
+          </div>
+          <div class="campo campo-full">
+            <button type="submit" class="btn-primario">Guardar cliente</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-head">
+          <h2>Clientes registrados</h2>
+          <span id="contadorClientes" class="badge-recibo">0</span>
+        </div>
+        <div class="campo filtro-box">
+          <input id="buscarCliente" type="text" placeholder="Buscar por nombre, teléfono o nota..." />
+        </div>
+        <div id="listaClientes" class="guardados-lista">
+          <p class="texto-vacio">Todavía no hay clientes registrados.</p>
         </div>
       </div>
     </section>
 
-    <section class="card">
-      <div class="section-head">
-        <h2>Descripción de trabajo y montos</h2>
-        <button type="button" id="btnAgregarItem" class="btn-primario">+ Agregar ítem</button>
+    <!-- PESTAÑA 4: PROVEEDORES -->
+    <section id="vistaProveedores" class="vista-seccion" hidden>
+      <div class="card">
+        <h2>Nuevo proveedor</h2>
+        <form id="formProveedor" class="grid-datos">
+          <div class="campo">
+            <label for="provNombre">Nombre o comercio *</label>
+            <input id="provNombre" type="text" required placeholder="Ej.: Aceros y Perfiles S.A." />
+          </div>
+          <div class="campo">
+            <label for="provRubro">Rubro</label>
+            <input id="provRubro" type="text" placeholder="Ej.: Metalúrgica, Tornería, Repuestos" />
+          </div>
+          <div class="campo">
+            <label for="provTelefono">Teléfono / Contacto</label>
+            <input id="provTelefono" type="text" placeholder="Ej.: (0985) 654 321" />
+          </div>
+          <div class="campo">
+            <label for="provNotas">Notas / Condiciones</label>
+            <input id="provNotas" type="text" placeholder="Ej.: Entrega en taller, crédito 15 días" />
+          </div>
+          <div class="campo campo-full">
+            <button type="submit" class="btn-primario">Guardar proveedor</button>
+          </div>
+        </form>
       </div>
 
-      <div id="listaItems" class="items-lista"></div>
-
-      <div class="total-box">
-        <span>MONTO TOTAL</span>
-        <strong id="montoTotal">0 Gs</strong>
+      <div class="card">
+        <div class="section-head">
+          <h2>Proveedores registrados</h2>
+          <span id="contadorProveedores" class="badge-recibo">0</span>
+        </div>
+        <div class="campo filtro-box">
+          <input id="buscarProveedor" type="text" placeholder="Buscar por nombre, rubro o teléfono..." />
+        </div>
+        <div id="listaProveedores" class="guardados-lista">
+          <p class="texto-vacio">Todavía no hay proveedores registrados.</p>
+        </div>
       </div>
     </section>
   </main>
-<section class="card" id="seccionAnticipo">
-      <h2>Anticipo y saldo del trabajo</h2>
-      <div class="grid-datos">
-        <div class="campo">
-          <label for="anticipoGs">Anticipo / entrega inicial (Gs.)</label>
-          <input id="anticipoGs" type="text" inputMode="numeric" placeholder="Ej.: 1.500.000" />
-        </div>
-        <div class="campo">
-          <label for="medioPago">Medio de pago</label>
-          <select id="medioPago">
-            <option value="Efectivo">Efectivo</option>
-            <option value="Transferencia">Transferencia</option>
-            <option value="Cheque">Cheque</option>
-            <option value="Otro">Otro</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="resumen-pagos">
-        <div class="fila-resumen">
-          <span>Monto total:</span>
-          <strong id="resumenTotal">0 Gs</strong>
-        </div>
-        <div class="fila-resumen">
-          <span>Anticipo / cobrado:</span>
-          <strong id="resumenAnticipo">0 Gs</strong>
-        </div>
-        <div class="fila-resumen saldo-destacado">
-          <span>Saldo pendiente:</span>
-          <strong id="resumenSaldo">0 Gs</strong>
-        </div>
-      </div>
-
-      <div class="acciones-recibo">
-        <button type="button" id="btnGenerarRecibo" class="btn-primario">Generar recibo</button>
-        <button type="button" id="btnCopiarRecibo" class="btn-secundario">Copiar texto para WhatsApp</button>
-      </div>
-    </section>
-
-    <section class="card recibo-box" id="reciboPreview" hidden>
-      <div class="recibo-header">
-        <div>
-          <p class="eyebrow">COMPROBANTE DE PAGO</p>
-          <h3>RECIBO — TALLER INTEGRAL S.A.</h3>
-        </div>
-        <span id="reciboNumero" class="badge-recibo">REC-0001</span>
-      </div>
-      <div id="reciboDetalle" class="recibo-detalle"></div>
-      <div class="acciones-recibo">
-        <button type="button" id="btnImprimirRecibo" class="btn-secundario">Imprimir / Guardar PDF</button>
-      </div>
-    </section>
-<section class="card">
-      <div class="section-head">
-        <h2>Datos del trabajo</h2>
-        <button type="button" id="btnNuevoPresupuesto" class="btn-secundario">Nuevo presupuesto</button>
-      </div>
-      <div class="grid-datos">
-        <div class="campo">
-          <label for="cliente">Cliente</label>
-          <input id="cliente" type="text" placeholder="Ej.: Juan Pérez" />
-        </div>
-        <div class="campo">
-          <label for="modeloRodado">Modelo / Rodado</label>
-          <input id="modeloRodado" type="text" placeholder="Ej.: CR cosechadora" />
-        </div>
-        <div class="campo">
-          <label for="fechaInicio">Fecha inicio</label>
-          <input id="fechaInicio" type="date" />
-        </div>
-        <div class="campo">
-          <label for="fechaEntrega">Fecha entrega</label>
-          <div class="input-con-accion">
-            <input id="fechaEntrega" type="text" placeholder="Ej.: Inmediata o 28/11/2026" />
-            <button type="button" id="btnInmediata" class="btn-secundario">Inmediata</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card" id="seccionGuardados">
-      <div class="section-head">
-        <h2>Presupuestos guardados (en este equipo)</h2>
-        <span id="contadorGuardados" class="badge-recibo">0</span>
-      </div>
-      <div id="listaGuardados" class="guardados-lista">
-        <p class="texto-vacio">Todavía no hay presupuestos guardados.</p>
-      </div>
-    </section>
-
 
   <script src="../js/app.js"></script>
 </body>

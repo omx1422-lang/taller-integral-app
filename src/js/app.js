@@ -1,5 +1,14 @@
-const STORAGE_KEY = "taller_integral_presupuestos_v1";
+const STORAGE_PRESUPUESTOS = "taller_integral_presupuestos_v1";
+const STORAGE_CLIENTES = "taller_integral_clientes_v1";
+const STORAGE_PROVEEDORES = "taller_integral_proveedores_v1";
+const btnIrARecibo = document.getElementById("btnIrARecibo");
+const resumenClienteActivoEl = document.getElementById("resumenClienteActivo");
 
+// Navegación por pestañas
+const tabBtns = document.querySelectorAll(".tab-btn");
+const vistas = document.querySelectorAll(".vista-seccion");
+
+// Elementos de Presupuesto y Recibo
 const listaItems = document.getElementById("listaItems");
 const montoTotalEl = document.getElementById("montoTotal");
 const btnAgregarItem = document.getElementById("btnAgregarItem");
@@ -27,9 +36,62 @@ const reciboDetalleEl = document.getElementById("reciboDetalle");
 const listaGuardadosEl = document.getElementById("listaGuardados");
 const contadorGuardadosEl = document.getElementById("contadorGuardados");
 
+// Elementos de Clientes
+const formCliente = document.getElementById("formCliente");
+const cliNombreInput = document.getElementById("cliNombre");
+const cliTelefonoInput = document.getElementById("cliTelefono");
+const cliDireccionInput = document.getElementById("cliDireccion");
+const cliNotasInput = document.getElementById("cliNotas");
+const buscarClienteInput = document.getElementById("buscarCliente");
+const listaClientesEl = document.getElementById("listaClientes");
+const contadorClientesEl = document.getElementById("contadorClientes");
+
+// Elementos de Proveedores
+const formProveedor = document.getElementById("formProveedor");
+const provNombreInput = document.getElementById("provNombre");
+const provRubroInput = document.getElementById("provRubro");
+const provTelefonoInput = document.getElementById("provTelefono");
+const provNotasInput = document.getElementById("provNotas");
+const buscarProveedorInput = document.getElementById("buscarProveedor");
+const listaProveedoresEl = document.getElementById("listaProveedores");
+const contadorProveedoresEl = document.getElementById("contadorProveedores");
+
 let totalActualGs = 0;
 let anticipoActualGs = 0;
 let saldoActualGs = 0;
+
+function cambiarVista(idVista) {
+  vistas.forEach((sec) => {
+    sec.hidden = sec.id !== idVista;
+  });
+  tabBtns.forEach((btn) => {
+    btn.classList.toggle("activa", btn.dataset.vista === idVista);
+  });
+}
+
+tabBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    if (btn.dataset.vista) cambiarVista(btn.dataset.vista);
+  });
+});
+
+function leerArrayStorage(clave) {
+  try {
+    const raw = localStorage.getItem(clave);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function escribirArrayStorage(clave, datos) {
+  try {
+    localStorage.setItem(clave, JSON.stringify(datos));
+  } catch {
+    alert("No se pudo guardar en el almacenamiento del navegador.");
+  }
+}
 
 function establecerFechaHoy() {
   if (fechaInicioInput) {
@@ -48,6 +110,10 @@ function limpiarMonto(texto) {
 }
 
 function actualizarResumenFinanciero() {
+    const nombreCli = (clienteInput?.value || "").trim();
+  if (resumenClienteActivoEl) {
+    resumenClienteActivoEl.textContent = nombreCli ? `Cliente: ${nombreCli}` : "Sin cliente cargado";
+  }
   let sumaItems = 0;
   if (listaItems) {
     listaItems.querySelectorAll(".monto-input").forEach((input) => {
@@ -119,24 +185,6 @@ function obtenerItemsActuales() {
   return items;
 }
 
-function leerGuardados() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function escribirGuardados(registros) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
-  } catch {
-    alert("No se pudo guardar en el almacenamiento del navegador.");
-  }
-}
-
 function obtenerSiguienteNumeroRecibo(registros) {
   let maxNum = 0;
   registros.forEach((reg) => {
@@ -151,7 +199,7 @@ function obtenerSiguienteNumeroRecibo(registros) {
 
 function guardarPresupuestoEnStorage(codigoRecibo) {
   actualizarResumenFinanciero();
-  const registros = leerGuardados();
+  const registros = leerArrayStorage(STORAGE_PRESUPUESTOS);
 
   const nuevoRegistro = {
     id: Date.now() + Math.floor(Math.random() * 1000),
@@ -169,7 +217,7 @@ function guardarPresupuestoEnStorage(codigoRecibo) {
   };
 
   registros.unshift(nuevoRegistro);
-  escribirGuardados(registros);
+  escribirArrayStorage(STORAGE_PRESUPUESTOS, registros);
   renderizarGuardados();
 }
 
@@ -203,17 +251,18 @@ function cargarRegistroEnFormulario(registro) {
   }
 
   actualizarResumenFinanciero();
+  cambiarVista("vistaPresupuesto");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-function eliminarRegistro(id) {
-  const filtrados = leerGuardados().filter((item) => item.id !== id);
-  escribirGuardados(filtrados);
+function eliminarPresupuesto(id) {
+  const filtrados = leerArrayStorage(STORAGE_PRESUPUESTOS).filter((item) => item.id !== id);
+  escribirArrayStorage(STORAGE_PRESUPUESTOS, filtrados);
   renderizarGuardados();
 }
 
 function renderizarGuardados() {
-  const registros = leerGuardados();
+  const registros = leerArrayStorage(STORAGE_PRESUPUESTOS);
   if (contadorGuardadosEl) contadorGuardadosEl.textContent = String(registros.length);
   if (!listaGuardadosEl) return;
 
@@ -247,7 +296,7 @@ function renderizarGuardados() {
     btnBorrar.type = "button";
     btnBorrar.className = "btn-eliminar";
     btnBorrar.textContent = "Borrar";
-    btnBorrar.addEventListener("click", () => eliminarRegistro(reg.id));
+    btnBorrar.addEventListener("click", () => eliminarPresupuesto(reg.id));
 
     acciones.append(btnCargar, btnBorrar);
     tarjeta.append(info, acciones);
@@ -256,7 +305,7 @@ function renderizarGuardados() {
 }
 
 function obtenerDatosRecibo() {
-  const registros = leerGuardados();
+  const registros = leerArrayStorage(STORAGE_PRESUPUESTOS);
   const cliente = (clienteInput?.value || "").trim() || "Cliente sin especificar";
   const equipo = (modeloRodadoInput?.value || "").trim() || "No especificado";
   const fecha = new Date().toLocaleDateString("es-PY");
@@ -292,6 +341,160 @@ function mostrarReciboEnPantalla(datos) {
   if (reciboPreview) reciboPreview.hidden = false;
 }
 
+// --- CLIENTES ---
+function renderizarClientes() {
+  const clientes = leerArrayStorage(STORAGE_CLIENTES);
+  const filtro = (buscarClienteInput?.value || "").trim().toLowerCase();
+  if (contadorClientesEl) contadorClientesEl.textContent = String(clientes.length);
+  if (!listaClientesEl) return;
+
+  const filtrados = clientes.filter((c) => {
+    const texto = `${c.nombre} ${c.telefono || ""} ${c.direccion || ""} ${c.notas || ""}`.toLowerCase();
+    return texto.includes(filtro);
+  });
+
+  if (filtrados.length === 0) {
+    listaClientesEl.innerHTML = `<p class="texto-vacio">${
+      clientes.length === 0 ? "Todavía no hay clientes registrados." : "No hay coincidencias con la búsqueda."
+    }</p>`;
+    return;
+  }
+
+  listaClientesEl.innerHTML = "";
+  filtrados.forEach((cli) => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "guardado-item";
+
+    const info = document.createElement("div");
+    info.className = "guardado-info";
+    const detalles = [cli.telefono, cli.direccion, cli.notas].filter(Boolean).join(" · ");
+    info.innerHTML = `
+      <strong>${cli.nombre}</strong>
+      <p>${detalles || "Sin datos adicionales"}</p>
+    `;
+
+    const acciones = document.createElement("div");
+    acciones.className = "guardado-acciones";
+
+    const btnUsar = document.createElement("button");
+    btnUsar.type = "button";
+    btnUsar.className = "btn-secundario";
+    btnUsar.textContent = "Usar en presupuesto";
+    btnUsar.addEventListener("click", () => {
+      if (clienteInput) clienteInput.value = cli.nombre;
+      cambiarVista("vistaPresupuesto");
+    });
+
+    const btnBorrar = document.createElement("button");
+    btnBorrar.type = "button";
+    btnBorrar.className = "btn-eliminar";
+    btnBorrar.textContent = "Borrar";
+    btnBorrar.addEventListener("click", () => {
+      const actualizados = leerArrayStorage(STORAGE_CLIENTES).filter((item) => item.id !== cli.id);
+      escribirArrayStorage(STORAGE_CLIENTES, actualizados);
+      renderizarClientes();
+    });
+
+    acciones.append(btnUsar, btnBorrar);
+    tarjeta.append(info, acciones);
+    listaClientesEl.appendChild(tarjeta);
+  });
+}
+
+formCliente?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nombre = (cliNombreInput?.value || "").trim();
+  if (!nombre) return;
+
+  const clientes = leerArrayStorage(STORAGE_CLIENTES);
+  clientes.unshift({
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    nombre,
+    telefono: (cliTelefonoInput?.value || "").trim(),
+    direccion: (cliDireccionInput?.value || "").trim(),
+    notas: (cliNotasInput?.value || "").trim(),
+  });
+
+  escribirArrayStorage(STORAGE_CLIENTES, clientes);
+  formCliente.reset();
+  renderizarClientes();
+});
+
+buscarClienteInput?.addEventListener("input", renderizarClientes);
+
+// --- PROVEEDORES ---
+function renderizarProveedores() {
+  const proveedores = leerArrayStorage(STORAGE_PROVEEDORES);
+  const filtro = (buscarProveedorInput?.value || "").trim().toLowerCase();
+  if (contadorProveedoresEl) contadorProveedoresEl.textContent = String(proveedores.length);
+  if (!listaProveedoresEl) return;
+
+  const filtrados = proveedores.filter((p) => {
+    const texto = `${p.nombre} ${p.rubro || ""} ${p.telefono || ""} ${p.notas || ""}`.toLowerCase();
+    return texto.includes(filtro);
+  });
+
+  if (filtrados.length === 0) {
+    listaProveedoresEl.innerHTML = `<p class="texto-vacio">${
+      proveedores.length === 0 ? "Todavía no hay proveedores registrados." : "No hay coincidencias con la búsqueda."
+    }</p>`;
+    return;
+  }
+
+  listaProveedoresEl.innerHTML = "";
+  filtrados.forEach((prov) => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "guardado-item";
+
+    const info = document.createElement("div");
+    info.className = "guardado-info";
+    const detalles = [prov.rubro, prov.telefono, prov.notas].filter(Boolean).join(" · ");
+    info.innerHTML = `
+      <strong>${prov.nombre}</strong>
+      <p>${detalles || "Sin datos adicionales"}</p>
+    `;
+
+    const acciones = document.createElement("div");
+    acciones.className = "guardado-acciones";
+
+    const btnBorrar = document.createElement("button");
+    btnBorrar.type = "button";
+    btnBorrar.className = "btn-eliminar";
+    btnBorrar.textContent = "Borrar";
+    btnBorrar.addEventListener("click", () => {
+      const actualizados = leerArrayStorage(STORAGE_PROVEEDORES).filter((item) => item.id !== prov.id);
+      escribirArrayStorage(STORAGE_PROVEEDORES, actualizados);
+      renderizarProveedores();
+    });
+
+    acciones.append(btnBorrar);
+    tarjeta.append(info, acciones);
+    listaProveedoresEl.appendChild(tarjeta);
+  });
+}
+
+formProveedor?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nombre = (provNombreInput?.value || "").trim();
+  if (!nombre) return;
+
+  const proveedores = leerArrayStorage(STORAGE_PROVEEDORES);
+  proveedores.unshift({
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    nombre,
+    rubro: (provRubroInput?.value || "").trim(),
+    telefono: (provTelefonoInput?.value || "").trim(),
+    notas: (provNotasInput?.value || "").trim(),
+  });
+
+  escribirArrayStorage(STORAGE_PROVEEDORES, proveedores);
+  formProveedor.reset();
+  renderizarProveedores();
+});
+
+buscarProveedorInput?.addEventListener("input", renderizarProveedores);
+
+// --- EVENTOS PRESUPUESTO ---
 anticipoInput?.addEventListener("input", () => {
   const limpio = limpiarMonto(anticipoInput.value);
   anticipoInput.value = limpio ? limpio.toLocaleString("es-PY") : "";
@@ -351,7 +554,15 @@ btnNuevoPresupuesto?.addEventListener("click", () => {
 
 btnAgregarItem?.addEventListener("click", () => crearFilaItem());
 
+btnIrARecibo?.addEventListener("click", () => {
+  actualizarResumenFinanciero();
+  cambiarVista("vistaRecibos");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
 // Inicialización
 establecerFechaHoy();
 crearFilaItem();
 renderizarGuardados();
+renderizarClientes();
+renderizarProveedores();

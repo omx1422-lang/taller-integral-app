@@ -322,3 +322,48 @@ select {
   color: var(--muted);
   font-size: 0.92rem;
 }
+
+.tabs-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tab-btn {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tab-btn.activa {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.vista-seccion {
+  display: grid;
+  gap: 16px;
+}
+
+.vista-seccion[hidden] {
+  display: none;
+}
+
+.campo-full {
+  grid-column: 1 / -1;
+  align-items: flex-start;
+}
+
+.campo-full .btn-primario {
+  width: auto;
+}
+
+.filtro-box {
+  margin-bottom: 12px;
+}
