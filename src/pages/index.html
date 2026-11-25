@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Presupuesto — Taller Integral S.A.</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="card header-taller">
+      <div>
+        <p class="eyebrow">PRESUPUESTO</p>
+        <h1>TALLER INTEGRAL S.A.</h1>
+        <p class="rubros">Metalúrgica · Tornería · Mecánica · Soldaduras · Lavadero</p>
+      </div>
+      <div class="contacto-taller">
+        <p><strong>Tel.:</strong> (0985) 668 105</p>
+        <p><strong>Dir.:</strong> Bella Vista - Barrio San Pablo</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <h2>Datos del trabajo</h2>
+      <div class="grid-datos">
+        <div class="campo">
+          <label for="cliente">Cliente</label>
+          <input id="cliente" type="text" placeholder="Ej.: Juan Pérez" />
+        </div>
+        <div class="campo">
+          <label for="modeloRodado">Modelo / Rodado</label>
+          <input id="modeloRodado" type="text" placeholder="Ej.: CR cosechadora" />
+        </div>
+        <div class="campo">
+          <label for="fechaInicio">Fecha inicio</label>
+          <input id="fechaInicio" type="date" />
+        </div>
+        <div class="campo">
+          <label for="fechaEntrega">Fecha entrega</label>
+          <div class="input-con-accion">
+            <input id="fechaEntrega" type="text" placeholder="Ej.: Inmediata o 28/11/2026" />
+            <button type="button" id="btnInmediata" class="btn-secundario">Inmediata</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <h2>Descripción de trabajo y montos</h2>
+        <button type="button" id="btnAgregarItem" class="btn-primario">+ Agregar ítem</button>
+      </div>
+
+      <div id="listaItems" class="items-lista"></div>
+
+      <div class="total-box">
+        <span>MONTO TOTAL</span>
+        <strong id="montoTotal">0 Gs</strong>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/app.js"></script>
+</body>
+</html>
