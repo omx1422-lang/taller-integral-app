@@ -30,19 +30,12 @@ const contadorGuardadosEl = document.getElementById("contadorGuardados");
 let totalActualGs = 0;
 let anticipoActualGs = 0;
 let saldoActualGs = 0;
-let contadorRecibo = 1;
 
 function establecerFechaHoy() {
   if (fechaInicioInput) {
     fechaInicioInput.value = new Date().toISOString().split("T")[0];
   }
 }
-
-establecerFechaHoy();
-
-btnInmediata?.addEventListener("click", () => {
-  if (fechaEntregaInput) fechaEntregaInput.value = "Inmediata";
-});
 
 function formatearGuaranies(valor) {
   const numero = Number(valor) || 0;
@@ -56,12 +49,14 @@ function limpiarMonto(texto) {
 
 function actualizarResumenFinanciero() {
   let sumaItems = 0;
-  listaItems.querySelectorAll(".monto-input").forEach((input) => {
-    sumaItems += limpiarMonto(input.value);
-  });
+  if (listaItems) {
+    listaItems.querySelectorAll(".monto-input").forEach((input) => {
+      sumaItems += limpiarMonto(input.value);
+    });
+  }
 
   totalActualGs = sumaItems;
-  const anticipoIngresado = limpiarMonto(anticipoInput?.value);
+  const anticipoIngresado = limpiarMonto(anticipoInput ? anticipoInput.value : "");
   anticipoActualGs = Math.min(anticipoIngresado, totalActualGs);
   saldoActualGs = Math.max(totalActualGs - anticipoActualGs, 0);
 
@@ -71,13 +66,9 @@ function actualizarResumenFinanciero() {
   if (resumenSaldoEl) resumenSaldoEl.textContent = formatearGuaranies(saldoActualGs);
 }
 
-anticipoInput?.addEventListener("input", () => {
-  const limpio = limpiarMonto(anticipoInput.value);
-  anticipoInput.value = limpio ? limpio.toLocaleString("es-PY") : "";
-  actualizarResumenFinanciero();
-});
-
 function crearFilaItem(descripcion = "", monto = "") {
+  if (!listaItems) return;
+
   const fila = document.createElement("div");
   fila.className = "item-fila";
 
@@ -116,6 +107,8 @@ function crearFilaItem(descripcion = "", monto = "") {
 
 function obtenerItemsActuales() {
   const items = [];
+  if (!listaItems) return items;
+
   listaItems.querySelectorAll(".item-fila").forEach((fila) => {
     const descripcion = fila.querySelector(".desc-input")?.value.trim() || "";
     const montoGs = limpiarMonto(fila.querySelector(".monto-input")?.value);
@@ -129,22 +122,40 @@ function obtenerItemsActuales() {
 function leerGuardados() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
 }
 
 function escribirGuardados(registros) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+  } catch {
+    alert("No se pudo guardar en el almacenamiento del navegador.");
+  }
+}
+
+function obtenerSiguienteNumeroRecibo(registros) {
+  let maxNum = 0;
+  registros.forEach((reg) => {
+    const match = String(reg.codigo || "").match(/REC-(\d+)/i);
+    if (match) {
+      const n = Number(match[1]);
+      if (n > maxNum) maxNum = n;
+    }
+  });
+  return maxNum + 1;
 }
 
 function guardarPresupuestoEnStorage(codigoRecibo) {
   actualizarResumenFinanciero();
   const registros = leerGuardados();
+
   const nuevoRegistro = {
-    id: Date.now(),
-    codigo: codigoRecibo || `PRE-${String(registros.length + 1).padStart(4, "0")}`,
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    codigo: codigoRecibo,
     fechaGuardado: new Date().toLocaleDateString("es-PY"),
     cliente: (clienteInput?.value || "").trim() || "Cliente sin especificar",
     modeloRodado: (modeloRodadoInput?.value || "").trim() || "No especificado",
@@ -163,21 +174,34 @@ function guardarPresupuestoEnStorage(codigoRecibo) {
 }
 
 function cargarRegistroEnFormulario(registro) {
-  if (clienteInput) clienteInput.value = registro.cliente === "Cliente sin especificar" ? "" : registro.cliente;
-  if (modeloRodadoInput) modeloRodadoInput.value = registro.modeloRodado === "No especificado" ? "" : registro.modeloRodado;
-  if (fechaInicioInput && registro.fechaInicio) fechaInicioInput.value = registro.fechaInicio;
-  if (fechaEntregaInput) fechaEntregaInput.value = registro.fechaEntrega || "";
-  if (medioPagoSelect && registro.medioPago) medioPagoSelect.value = registro.medioPago;
+  if (clienteInput) {
+    clienteInput.value = registro.cliente === "Cliente sin especificar" ? "" : registro.cliente;
+  }
+  if (modeloRodadoInput) {
+    modeloRodadoInput.value = registro.modeloRodado === "No especificado" ? "" : registro.modeloRodado;
+  }
+  if (fechaInicioInput && registro.fechaInicio) {
+    fechaInicioInput.value = registro.fechaInicio;
+  }
+  if (fechaEntregaInput) {
+    fechaEntregaInput.value = registro.fechaEntrega || "";
+  }
+  if (medioPagoSelect && registro.medioPago) {
+    medioPagoSelect.value = registro.medioPago;
+  }
   if (anticipoInput) {
     anticipoInput.value = registro.anticipoGs ? Number(registro.anticipoGs).toLocaleString("es-PY") : "";
   }
 
-  listaItems.innerHTML = "";
-  if (Array.isArray(registro.items) && registro.items.length > 0) {
-    registro.items.forEach((it) => crearFilaItem(it.descripcion, it.montoGs));
-  } else {
-    crearFilaItem();
+  if (listaItems) {
+    listaItems.innerHTML = "";
+    if (Array.isArray(registro.items) && registro.items.length > 0) {
+      registro.items.forEach((it) => crearFilaItem(it.descripcion, it.montoGs));
+    } else {
+      crearFilaItem();
+    }
   }
+
   actualizarResumenFinanciero();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -237,8 +261,8 @@ function obtenerDatosRecibo() {
   const equipo = (modeloRodadoInput?.value || "").trim() || "No especificado";
   const fecha = new Date().toLocaleDateString("es-PY");
   const medio = medioPagoSelect?.value || "Efectivo";
-  const numeroActual = Math.max(contadorRecibo, registros.length + 1);
-  const codigo = `REC-${String(numeroActual).padStart(4, "0")}`;
+  const siguienteNum = obtenerSiguienteNumeroRecibo(registros);
+  const codigo = `REC-${String(siguienteNum).padStart(4, "0")}`;
 
   return {
     codigo,
@@ -252,11 +276,8 @@ function obtenerDatosRecibo() {
   };
 }
 
-btnGenerarRecibo?.addEventListener("click", () => {
-  actualizarResumenFinanciero();
-  const datos = obtenerDatosRecibo();
+function mostrarReciboEnPantalla(datos) {
   if (reciboNumeroEl) reciboNumeroEl.textContent = datos.codigo;
-
   if (reciboDetalleEl) {
     reciboDetalleEl.innerHTML = `
       <p><strong>Fecha:</strong> ${datos.fecha}</p>
@@ -268,10 +289,24 @@ btnGenerarRecibo?.addEventListener("click", () => {
       <p><strong>Saldo pendiente:</strong> ${datos.saldo}</p>
     `;
   }
-
   if (reciboPreview) reciboPreview.hidden = false;
+}
+
+anticipoInput?.addEventListener("input", () => {
+  const limpio = limpiarMonto(anticipoInput.value);
+  anticipoInput.value = limpio ? limpio.toLocaleString("es-PY") : "";
+  actualizarResumenFinanciero();
+});
+
+btnInmediata?.addEventListener("click", () => {
+  if (fechaEntregaInput) fechaEntregaInput.value = "Inmediata";
+});
+
+btnGenerarRecibo?.addEventListener("click", () => {
+  actualizarResumenFinanciero();
+  const datos = obtenerDatosRecibo();
+  mostrarReciboEnPantalla(datos);
   guardarPresupuestoEnStorage(datos.codigo);
-  contadorRecibo += 1;
 });
 
 btnCopiarRecibo?.addEventListener("click", async () => {
@@ -307,11 +342,16 @@ btnNuevoPresupuesto?.addEventListener("click", () => {
   if (medioPagoSelect) medioPagoSelect.value = "Efectivo";
   if (reciboPreview) reciboPreview.hidden = true;
   establecerFechaHoy();
-  listaItems.innerHTML = "";
-  crearFilaItem();
+  if (listaItems) {
+    listaItems.innerHTML = "";
+    crearFilaItem();
+  }
   actualizarResumenFinanciero();
 });
 
 btnAgregarItem?.addEventListener("click", () => crearFilaItem());
+
+// Inicialización
+establecerFechaHoy();
 crearFilaItem();
 renderizarGuardados();
