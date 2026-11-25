@@ -409,3 +409,8 @@ select {
   padding: 6px 10px;
   font-size: 0.82rem;
 }
+.btn-importar {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}

@@ -415,6 +415,68 @@ function mostrarReciboEnPantalla(datos) {
 
 // --- CLIENTES ---
 function renderizarClientes() {
+const listaClientesSugeridosEl = document.getElementById("listaClientesSugeridos");
+const btnExportarDatos = document.getElementById("btnExportarDatos");
+const inputImportarDatos = document.getElementById("inputImportarDatos");
+
+function actualizarDatalistClientes() {
+  if (!listaClientesSugeridosEl) return;
+  const clientes = leerArrayStorage(STORAGE_CLIENTES);
+  listaClientesSugeridosEl.innerHTML = "";
+
+  clientes.forEach((cli) => {
+    const opcion = document.createElement("option");
+    opcion.value = cli.nombre;
+    if (cli.telefono) opcion.label = cli.telefono;
+    listaClientesSugeridosEl.appendChild(opcion);
+  });
+}
+
+btnExportarDatos?.addEventListener("click", () => {
+  const respaldo = {
+    exportadoEn: new Date().toISOString(),
+    presupuestos: leerArrayStorage(STORAGE_PRESUPUESTOS),
+    clientes: leerArrayStorage(STORAGE_CLIENTES),
+    proveedores: leerArrayStorage(STORAGE_PROVEEDORES),
+  };
+
+  const blob = new Blob([JSON.stringify(respaldo, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const enlace = document.createElement("a");
+  enlace.href = url;
+  enlace.download = `taller-integral-respaldo-${new Date().toISOString().slice(0, 10)}.json`;
+  enlace.click();
+  URL.revokeObjectURL(url);
+});
+
+inputImportarDatos?.addEventListener("change", async (e) => {
+  const archivo = e.target.files?.[0];
+  if (!archivo) return;
+
+  try {
+    const texto = await archivo.text();
+    const data = JSON.parse(texto);
+
+    if (Array.isArray(data.presupuestos)) {
+      escribirArrayStorage(STORAGE_PRESUPUESTOS, data.presupuestos);
+    }
+    if (Array.isArray(data.clientes)) {
+      escribirArrayStorage(STORAGE_CLIENTES, data.clientes);
+    }
+    if (Array.isArray(data.proveedores)) {
+      escribirArrayStorage(STORAGE_PROVEEDORES, data.proveedores);
+    }
+
+    renderizarGuardados();
+    renderizarClientes();
+    renderizarProveedores();
+    alert("Respaldo importado correctamente.");
+  } catch {
+    alert("El archivo seleccionado no es un respaldo JSON válido.");
+  } finally {
+    inputImportarDatos.value = "";
+  }
+});
   const clientes = leerArrayStorage(STORAGE_CLIENTES);
   const filtro = (buscarClienteInput?.value || "").trim().toLowerCase();
   if (contadorClientesEl) contadorClientesEl.textContent = String(clientes.length);
@@ -471,6 +533,7 @@ function renderizarClientes() {
     tarjeta.append(info, acciones);
     listaClientesEl.appendChild(tarjeta);
   });
+  actualizarDatalistClientes();
 }
 
 formCliente?.addEventListener("submit", (e) => {

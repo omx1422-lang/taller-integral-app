@@ -65,9 +65,10 @@
           </div>
           <div class="grid-datos">
             <div class="campo">
-              <label for="cliente">Cliente</label>
-              <input id="cliente" type="text" placeholder="Ej.: Juan Pérez" />
-            </div>
+            <label for="cliente">Cliente</label>
+            <input id="cliente" type="text" list="listaClientesSugeridos" placeholder="Ej.: Juan Pérez" />
+            <datalist id="listaClientesSugeridos"></datalist>
+          </div>
             <div class="campo">
               <label for="modeloRodado">Modelo / Rodado</label>
               <input id="modeloRodado" type="text" placeholder="Ej.: CR cosechadora" />
@@ -167,7 +168,12 @@
         <section class="card" id="seccionGuardados">
           <div class="section-head">
             <h2>Historial de presupuestos y recibos</h2>
-            <span id="contadorGuardados" class="badge-recibo">0</span>
+            <div class="guardado-acciones">
+              <button type="button" id="btnExportarDatos" class="btn-secundario">Exportar JSON</button>
+              <label for="inputImportarDatos" class="btn-secundario btn-importar">Importar JSON</label>
+              <input id="inputImportarDatos" type="file" accept=".json,application/json" hidden />
+              <span id="contadorGuardados" class="badge-recibo">0</span>
+            </div>
           </div>
           <div id="listaGuardados" class="guardados-lista">
             <p class="texto-vacio">Todavía no hay presupuestos guardados.</p>
