@@ -111,6 +111,45 @@
         <button type="button" id="btnImprimirRecibo" class="btn-secundario">Imprimir / Guardar PDF</button>
       </div>
     </section>
+<section class="card">
+      <div class="section-head">
+        <h2>Datos del trabajo</h2>
+        <button type="button" id="btnNuevoPresupuesto" class="btn-secundario">Nuevo presupuesto</button>
+      </div>
+      <div class="grid-datos">
+        <div class="campo">
+          <label for="cliente">Cliente</label>
+          <input id="cliente" type="text" placeholder="Ej.: Juan Pérez" />
+        </div>
+        <div class="campo">
+          <label for="modeloRodado">Modelo / Rodado</label>
+          <input id="modeloRodado" type="text" placeholder="Ej.: CR cosechadora" />
+        </div>
+        <div class="campo">
+          <label for="fechaInicio">Fecha inicio</label>
+          <input id="fechaInicio" type="date" />
+        </div>
+        <div class="campo">
+          <label for="fechaEntrega">Fecha entrega</label>
+          <div class="input-con-accion">
+            <input id="fechaEntrega" type="text" placeholder="Ej.: Inmediata o 28/11/2026" />
+            <button type="button" id="btnInmediata" class="btn-secundario">Inmediata</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="seccionGuardados">
+      <div class="section-head">
+        <h2>Presupuestos guardados (en este equipo)</h2>
+        <span id="contadorGuardados" class="badge-recibo">0</span>
+      </div>
+      <div id="listaGuardados" class="guardados-lista">
+        <p class="texto-vacio">Todavía no hay presupuestos guardados.</p>
+      </div>
+    </section>
+
+
   <script src="../js/app.js"></script>
 </body>
 </html>
