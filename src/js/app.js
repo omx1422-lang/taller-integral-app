@@ -3,6 +3,78 @@ const STORAGE_CLIENTES = "taller_integral_clientes_v1";
 const STORAGE_PROVEEDORES = "taller_integral_proveedores_v1";
 const btnIrARecibo = document.getElementById("btnIrARecibo");
 const resumenClienteActivoEl = document.getElementById("resumenClienteActivo");
+const SESSION_KEY = "taller_integral_sesion_v1";
+const USUARIO_ADMIN = "admin";
+const CLAVE_ADMIN = "taller2026";
+
+const vistaLogin = document.getElementById("vistaLogin");
+const appPrincipal = document.getElementById("appPrincipal");
+const formLogin = document.getElementById("formLogin");
+const loginUsuarioInput = document.getElementById("loginUsuario");
+const loginClaveInput = document.getElementById("loginClave");
+const loginErrorEl = document.getElementById("loginError");
+const btnAccesoDemo = document.getElementById("btnAccesoDemo");
+const btnCerrarSesion = document.getElementById("btnCerrarSesion");
+const usuarioActivoTextoEl = document.getElementById("usuarioActivoTexto");
+
+function activarSesion(nombreUsuario, esDemo = false) {
+  const infoSesion = { usuario: nombreUsuario, demo: esDemo };
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(infoSesion));
+  if (loginErrorEl) loginErrorEl.hidden = true;
+  if (vistaLogin) vistaLogin.hidden = true;
+  if (appPrincipal) appPrincipal.hidden = false;
+  if (usuarioActivoTextoEl) {
+    usuarioActivoTextoEl.textContent = esDemo
+      ? `Sesión: ${nombreUsuario} (Modo demo)`
+      : `Usuario: ${nombreUsuario}`;
+  }
+}
+
+function cerrarSesion() {
+  sessionStorage.removeItem(SESSION_KEY);
+  if (formLogin) formLogin.reset();
+  if (appPrincipal) appPrincipal.hidden = true;
+  if (vistaLogin) vistaLogin.hidden = false;
+}
+
+function verificarSesionInicial() {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) {
+      cerrarSesion();
+      return;
+    }
+    const sesion = JSON.parse(raw);
+    if (sesion && sesion.usuario) {
+      activarSesion(sesion.usuario, Boolean(sesion.demo));
+    } else {
+      cerrarSesion();
+    }
+  } catch {
+    cerrarSesion();
+  }
+}
+
+formLogin?.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const userIngresado = (loginUsuarioInput?.value || "").trim().toLowerCase();
+  const claveIngresada = loginClaveInput?.value || "";
+
+  if (userIngresado === USUARIO_ADMIN && claveIngresada === CLAVE_ADMIN) {
+    activarSesion(USUARIO_ADMIN, false);
+  } else {
+    if (loginErrorEl) loginErrorEl.hidden = false;
+  }
+});
+
+btnAccesoDemo?.addEventListener("click", () => {
+  activarSesion("Invitado Demo", true);
+});
+
+btnCerrarSesion?.addEventListener("click", cerrarSesion);
+
+// Llamá a esto al final de la inicialización de app.js:
+verificarSesionInicial();
 
 // Navegación por pestañas
 const tabBtns = document.querySelectorAll(".tab-btn");
