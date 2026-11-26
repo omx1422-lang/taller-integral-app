@@ -16,6 +16,9 @@ const loginErrorEl = document.getElementById("loginError");
 const btnAccesoDemo = document.getElementById("btnAccesoDemo");
 const btnCerrarSesion = document.getElementById("btnCerrarSesion");
 const usuarioActivoTextoEl = document.getElementById("usuarioActivoTexto");
+const estadoPresupuestoSelect = document.getElementById("estadoPresupuesto");
+const cliRucCiInput = document.getElementById("cliRucCi");
+const provRucCiInput = document.getElementById("provRucCi");
 
 function activarSesion(nombreUsuario, esDemo = false) {
   const infoSesion = { usuario: nombreUsuario, demo: esDemo };
@@ -117,6 +120,7 @@ const cliNotasInput = document.getElementById("cliNotas");
 const buscarClienteInput = document.getElementById("buscarCliente");
 const listaClientesEl = document.getElementById("listaClientes");
 const contadorClientesEl = document.getElementById("contadorClientes");
+
 
 // Elementos de Proveedores
 const formProveedor = document.getElementById("formProveedor");
@@ -701,3 +705,4 @@ crearFilaItem();
 renderizarGuardados();
 renderizarClientes();
 renderizarProveedores();
+actualizarDatalistClientes();

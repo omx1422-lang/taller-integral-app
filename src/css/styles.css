@@ -414,3 +414,13 @@ select {
   align-items: center;
   cursor: pointer;
 }
+.estado-select {
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  color: var(--text);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
